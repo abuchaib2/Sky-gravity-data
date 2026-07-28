@@ -1,10 +1,1 @@
-{
-    "show_revive_rewarded": false,
-    "show_double_reward": false,
-    "show_home_banner": false,
-    "show_gameover_interstitial": false,
-    "enable_ad_density_throttling": true,
-    "enable_interstitial_cooldown": true,
-    "enable_graceful_transition": true,
-    "ad_mode": "OFF"
-}
+
