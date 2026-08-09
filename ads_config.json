@@ -1,6 +1,6 @@
 
 {
-    "ad_mode": "REAL",
+    "ad_mode": "OFF",
     "show_revive_rewarded": true,
     "show_double_reward": true,
     "show_home_banner": true,
