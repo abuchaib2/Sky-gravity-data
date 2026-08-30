@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sky Gravity: Comet Survival - Navigate the Cosmos</title>
+    <meta name="description" content="Sky Gravity: Comet Survival - A thrilling space adventure game. Dodge comets, master gravity, and survive the cosmos. Download free on Google Play.">
+    <meta name="keywords" content="Sky Gravity, Comet Survival, space game, android game, casual game, gravity game">
+    <meta name="author" content="Sky Gravity Studio">
+    <meta property="og:title" content="Sky Gravity: Comet Survival">
+    <meta property="og:description" content="Navigate through space, dodge deadly comets, and master gravity mechanics in this thrilling survival game.">
+    <meta property="og:type" content="website">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #050a18;
+            --bg-secondary: #0a1428;
+            --bg-card: rgba(15, 25, 55, 0.6);
+            --border-glow: rgba(100, 180, 255, 0.15);
+            --text-primary: #e8f0ff;
+            --text-secondary: #8ba3c7;
+            --accent-blue: #4da6ff;
+            --accent-cyan: #00e5ff;
+            --accent-purple: #9d6fff;
+            --accent-pink: #ff6bca;
+            --gradient-hero: linear-gradient(135deg, #0a0e27 0%, #0d1b3e 30%, #1a0a3e 60%, #0a0e27 100%);
+            --glass-bg: rgba(10, 20, 50, 0.5);
+            --glass-border: rgba(100, 180, 255, 0.1);
+            --shadow-glow: 0 0 30px rgba(77, 166, 255, 0.1);
+            --font-en: 'Outfit', sans-serif;
+            --font-ar: 'Cairo', sans-serif;
+            --transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: var(--font-en);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        body.rtl {
+            direction: rtl;
+            font-family: var(--font-ar);
+        }
+
+        /* Stars */
+        .stars-container {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .star {
+            position: absolute;
+            border-radius: 50%;
+            background: white;
+            animation: twinkle var(--duration) ease-in-out infinite;
+            opacity: 0;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.1; transform: scale(0.8); }
+            50% { opacity: var(--max-opacity); transform: scale(1.2); }
+        }
+
+        /* Shooting Stars */
+        .shooting-star {
+            position: fixed;
+            width: 120px; height: 2px;
+            background: linear-gradient(90deg, var(--accent-cyan), transparent);
+            border-radius: 50%;
+            animation: shoot 4s linear infinite;
+            opacity: 0;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .shooting-star::before {
+            content: '';
+            position: absolute;
+            right: 0;
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: white;
+            box-shadow: 0 0 10px var(--accent-cyan), 0 0 20px var(--accent-cyan);
+            transform: translate(50%, -40%);
+        }
+
+        .shooting-star:nth-child(1) { top: 15%; left: -120px; animation-delay: 1s; }
+        .shooting-star:nth-child(2) { top: 45%; left: -120px; animation-delay: 5s; animation-duration: 3.5s; }
+        .shooting-star:nth-child(3) { top: 70%; left: -120px; animation-delay: 9s; animation-duration: 4.5s; }
+
+        @keyframes shoot {
+            0% { transform: translateX(0) translateY(0) rotate(-15deg); opacity: 0; }
+            5% { opacity: 1; }
+            15% { opacity: 1; }
+            20% { transform: translateX(calc(100vw + 200px)) translateY(80px) rotate(-15deg); opacity: 0; }
+            100% { opacity: 0; }
+        }
+
+        /* Language Switcher */
+        .lang-switcher {
+            position: fixed;
+            top: 20px; right: 20px;
+            z-index: 1000;
+            display: flex; gap: 4px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 30px;
+            padding: 4px;
+            box-shadow: var(--shadow-glow);
+        }
+
+        .lang-btn {
+            padding: 8px 18px;
+            border: none;
+            border-radius: 26px;
+            background: transparent;
+            color: var(--text-secondary);
+            font-family: var(--font-en);
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            letter-spacing: 0.5px;
+        }
+
+        .lang-btn.active {
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            color: white;
+            box-shadow: 0 4px 15px rgba(77, 166, 255, 0.3);
+        }
+
+        .lang-btn:hover:not(.active) {
+            color: var(--text-primary);
+            background: rgba(77, 166, 255, 0.1);
+        }
+
+        /* Hero Section */
+        .hero {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 80px 20px 60px;
+            background: var(--gradient-hero);
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: 50%;
+            transform: translateX(-50%);
+            width: 800px; height: 800px;
+            background: radial-gradient(circle, rgba(77, 166, 255, 0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0;
+            width: 100%; height: 200px;
+            background: linear-gradient(to top, var(--bg-primary), transparent);
+            pointer-events: none;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 800px;
+        }
+
+        .game-icon {
+            width: 120px; height: 120px;
+            border-radius: 28px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(77, 166, 255, 0.3), 0 0 60px rgba(77, 166, 255, 0.1);
+            animation: floatIcon 4s ease-in-out infinite;
+            border: 2px solid rgba(77, 166, 255, 0.2);
+        }
+
+        @keyframes floatIcon {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .hero-title {
+            font-size: clamp(2.2rem, 5vw, 3.8rem);
+            font-weight: 800;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #ffffff 0%, var(--accent-cyan) 50%, var(--accent-blue) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
+            line-height: 1.2;
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1rem, 2.5vw, 1.3rem);
+            color: var(--accent-cyan);
+            font-weight: 500;
+            margin-bottom: 24px;
+            opacity: 0.9;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .hero-description {
+            font-size: clamp(1rem, 2vw, 1.15rem);
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 40px;
+            line-height: 1.8;
+        }
+
+        .play-badge {
+            display: inline-block;
+            transition: var(--transition);
+        }
+
+        .play-badge:hover {
+            transform: scale(1.05);
+            filter: brightness(1.1);
+        }
+
+        .play-badge img {
+            height: 65px;
+            filter: drop-shadow(0 4px 15px rgba(0, 0, 0, 0.4));
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 40px; left: 50%;
+            transform: translateX(-50%);
+            z-index: 2;
+            animation: bounce 2s ease-in-out infinite;
+            opacity: 0.5;
+        }
+
+        .scroll-indicator svg {
+            width: 28px; height: 28px;
+            fill: var(--text-secondary);
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(10px); }
+        }
+
+        /* Section Common */
+        section {
+            position: relative;
+            z-index: 1;
+            padding: 100px 20px;
+        }
+
+        .section-container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .section-badge {
+            display: inline-block;
+            padding: 6px 18px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+            background: rgba(77, 166, 255, 0.1);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(0, 229, 255, 0.2);
+        }
+
+        .section-title {
+            font-size: clamp(1.8rem, 4vw, 2.6rem);
+            font-weight: 700;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-blue) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-description {
+            font-size: 1.05rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 50px;
+            line-height: 1.8;
+        }
+
+        /* Features */
+        .features {
+            background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, var(--bg-primary) 100%);
+            text-align: center;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 24px;
+        }
+
+        .feature-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 36px 28px;
+            text-align: center;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--card-accent, var(--accent-blue)), transparent);
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(100, 180, 255, 0.25);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 30px rgba(77, 166, 255, 0.05);
+        }
+
+        .feature-card:hover::before { opacity: 1; }
+
+        .feature-icon {
+            width: 64px; height: 64px;
+            margin: 0 auto 20px;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            background: linear-gradient(135deg, rgba(77, 166, 255, 0.15), rgba(157, 111, 255, 0.15));
+            border: 1px solid rgba(77, 166, 255, 0.15);
+            transition: var(--transition);
+        }
+
+        .feature-card:hover .feature-icon {
+            transform: scale(1.1);
+            box-shadow: 0 0 25px rgba(77, 166, 255, 0.2);
+        }
+
+        .feature-card:nth-child(1) { --card-accent: var(--accent-cyan); }
+        .feature-card:nth-child(2) { --card-accent: var(--accent-purple); }
+        .feature-card:nth-child(3) { --card-accent: var(--accent-pink); }
+        .feature-card:nth-child(4) { --card-accent: var(--accent-blue); }
+
+        .feature-card:nth-child(1) .feature-icon { background: linear-gradient(135deg, rgba(0, 229, 255, 0.15), rgba(0, 229, 255, 0.05)); border-color: rgba(0, 229, 255, 0.2); }
+        .feature-card:nth-child(2) .feature-icon { background: linear-gradient(135deg, rgba(157, 111, 255, 0.15), rgba(157, 111, 255, 0.05)); border-color: rgba(157, 111, 255, 0.2); }
+        .feature-card:nth-child(3) .feature-icon { background: linear-gradient(135deg, rgba(255, 107, 202, 0.15), rgba(255, 107, 202, 0.05)); border-color: rgba(255, 107, 202, 0.2); }
+        .feature-card:nth-child(4) .feature-icon { background: linear-gradient(135deg, rgba(77, 166, 255, 0.15), rgba(77, 166, 255, 0.05)); border-color: rgba(77, 166, 255, 0.2); }
+
+        .feature-title {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+        }
+
+        .feature-text {
+            font-size: 0.92rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        /* Screenshots */
+        .screenshots {
+            text-align: center;
+            background: var(--bg-primary);
+            overflow: hidden;
+        }
+
+        .screenshots-scroll {
+            display: flex;
+            gap: 24px;
+            justify-content: center;
+            flex-wrap: wrap;
+            padding: 10px 0;
+        }
+
+        .screenshot-frame {
+            position: relative;
+            width: 220px;
+            flex-shrink: 0;
+            border-radius: 24px;
+            overflow: hidden;
+            border: 2px solid rgba(100, 180, 255, 0.12);
+            transition: var(--transition);
+            background: var(--bg-card);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .screenshot-frame:hover {
+            transform: scale(1.04) translateY(-5px);
+            border-color: rgba(100, 180, 255, 0.3);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), 0 0 30px rgba(77, 166, 255, 0.1);
+        }
+
+        .screenshot-placeholder {
+            width: 100%;
+            aspect-ratio: 9/19;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--bg-secondary), var(--bg-primary));
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            padding: 20px;
+            text-align: center;
+            gap: 10px;
+        }
+
+        .screenshot-placeholder .placeholder-icon {
+            font-size: 2.5rem;
+            opacity: 0.5;
+        }
+
+        /* CTA */
+        .cta-section {
+            text-align: center;
+            background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+            padding: 80px 20px;
+        }
+
+        .cta-box {
+            max-width: 650px;
+            margin: 0 auto;
+            padding: 50px 40px;
+            background: var(--bg-card);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-box::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent-purple), var(--accent-cyan), var(--accent-blue));
+        }
+
+        .cta-title {
+            font-size: clamp(1.5rem, 3vw, 2rem);
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+
+        .cta-text {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+            line-height: 1.7;
+        }
+
+        /* Footer */
+        footer {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            padding: 40px 20px;
+            background: var(--bg-secondary);
+            border-top: 1px solid rgba(100, 180, 255, 0.06);
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+
+        .footer-links a:hover { color: var(--accent-cyan); }
+
+        .footer-copyright {
+            color: rgba(139, 163, 199, 0.5);
+            font-size: 0.8rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero { padding: 100px 20px 80px; }
+            .game-icon { width: 90px; height: 90px; }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+                max-width: 400px;
+                margin: 0 auto;
+            }
+
+            .screenshots-scroll {
+                flex-wrap: nowrap;
+                justify-content: flex-start;
+                overflow-x: auto;
+                padding: 10px 20px;
+                scroll-snap-type: x mandatory;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+            }
+
+            .screenshots-scroll::-webkit-scrollbar { display: none; }
+            .screenshot-frame { scroll-snap-align: center; width: 180px; }
+            .cta-box { padding: 36px 24px; }
+            .lang-switcher { top: 12px; right: 12px; }
+            .lang-btn { padding: 6px 14px; font-size: 0.8rem; }
+            section { padding: 70px 20px; }
+        }
+
+        body.rtl .hero-subtitle { letter-spacing: 1px; }
+        body.rtl .section-badge { letter-spacing: 1px; }
+
+        /* Fade-in */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Nebula */
+        .nebula {
+            position: fixed;
+            width: 600px; height: 600px;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.04;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .nebula-1 { top: 10%; left: -10%; background: var(--accent-purple); }
+        .nebula-2 { bottom: 20%; right: -10%; background: var(--accent-blue); }
+        .nebula-3 { top: 50%; left: 30%; background: var(--accent-cyan); width: 400px; height: 400px; }
+    </style>
+</head>
+<body>
+    <div class="stars-container" id="starsContainer"></div>
+    <div class="shooting-star"></div>
+    <div class="shooting-star"></div>
+    <div class="shooting-star"></div>
+    <div class="nebula nebula-1"></div>
+    <div class="nebula nebula-2"></div>
+    <div class="nebula nebula-3"></div>
+
+    <div class="lang-switcher">
+        <button class="lang-btn active" id="btnEN" onclick="setLang('en')">EN</button>
+        <button class="lang-btn" id="btnAR" onclick="setLang('ar')">عربي</button>
+    </div>
+
+    <section class="hero" id="hero">
+        <div class="hero-content">
+            <img src="https://play-lh.googleusercontent.com/6rYGXfxRZgnqnZmCHXkIRkbvk6EhG9FEz8kfOqgWJ9-fMnqdj7oxwOOK2JCXQOlhEg=w240-h480-rw" alt="Sky Gravity Game Icon" class="game-icon" onerror="this.style.display='none'">
+            <h1 class="hero-title" data-en="Sky Gravity" data-ar="سكاي جرافيتي">Sky Gravity</h1>
+            <p class="hero-subtitle" data-en="Comet Survival" data-ar="البقاء بين المذنبات">Comet Survival</p>
+            <p class="hero-description" data-en="Navigate through the vastness of space, dodge deadly comets, and harness the power of gravity to survive. How long can you endure the cosmic storm?" data-ar="أبحر عبر الفضاء الشاسع، تفادَ المذنبات القاتلة، واستغل قوة الجاذبية للبقاء على قيد الحياة. إلى متى يمكنك الصمود في العاصفة الكونية؟">Navigate through the vastness of space, dodge deadly comets, and harness the power of gravity to survive. How long can you endure the cosmic storm?</p>
+            <a href="https://play.google.com/store/apps/details?id=com.skygravity.orbitrunner" class="play-badge" target="_blank" rel="noopener">
+                <img id="playBadge" src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" alt="Get it on Google Play">
+            </a>
+        </div>
+        <div class="scroll-indicator">
+            <svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+        </div>
+    </section>
+
+    <section class="features" id="features">
+        <div class="section-container fade-in">
+            <span class="section-badge" data-en="FEATURES" data-ar="المميزات">FEATURES</span>
+            <h2 class="section-title" data-en="Why You'll Love It" data-ar="لماذا ستحبها">Why You'll Love It</h2>
+            <p class="section-description" data-en="Immerse yourself in a space adventure filled with challenges and breathtaking visuals." data-ar="انغمس في مغامرة فضائية مليئة بالتحديات والمرئيات الخلابة.">Immerse yourself in a space adventure filled with challenges and breathtaking visuals.</p>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🌌</div>
+                    <h3 class="feature-title" data-en="Gravity Mechanics" data-ar="ميكانيكا الجاذبية">Gravity Mechanics</h3>
+                    <p class="feature-text" data-en="Master unique gravity-based controls to navigate through space. Every move matters in the fight for survival." data-ar="أتقن عناصر التحكم القائمة على الجاذبية للتنقل عبر الفضاء. كل حركة مهمة في معركة البقاء.">Master unique gravity-based controls to navigate through space. Every move matters in the fight for survival.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">☄️</div>
+                    <h3 class="feature-title" data-en="Comet Dodging" data-ar="تفادي المذنبات">Comet Dodging</h3>
+                    <p class="feature-text" data-en="Dodge waves of comets and asteroids that increase in speed and intensity. Test your reflexes to the limit!" data-ar="تفادَ موجات المذنبات والكويكبات التي تزداد سرعةً وشدة. اختبر ردود أفعالك إلى أقصى حد!">Dodge waves of comets and asteroids that increase in speed and intensity. Test your reflexes to the limit!</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">✨</div>
+                    <h3 class="feature-title" data-en="Stunning Visuals" data-ar="رسومات مذهلة">Stunning Visuals</h3>
+                    <p class="feature-text" data-en="Enjoy breathtaking space environments with dynamic lighting, particle effects, and immersive cosmic landscapes." data-ar="استمتع ببيئات فضائية خلابة مع إضاءة ديناميكية وتأثيرات جسيمات ومناظر كونية آسرة.">Enjoy breathtaking space environments with dynamic lighting, particle effects, and immersive cosmic landscapes.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🏆</div>
+                    <h3 class="feature-title" data-en="Endless Challenge" data-ar="تحدٍ بلا نهاية">Endless Challenge</h3>
+                    <p class="feature-text" data-en="Compete for the highest score and climb the ranks. Every run is a new opportunity to break your record!" data-ar="نافس على أعلى الدرجات وتسلّق المراتب. كل جولة فرصة جديدة لتحطيم رقمك القياسي!">Compete for the highest score and climb the ranks. Every run is a new opportunity to break your record!</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="screenshots" id="screenshots">
+        <div class="section-container fade-in">
+            <span class="section-badge" data-en="SCREENSHOTS" data-ar="لقطات الشاشة">SCREENSHOTS</span>
+            <h2 class="section-title" data-en="A Glimpse Into Space" data-ar="لمحة من الفضاء">A Glimpse Into Space</h2>
+            <p class="section-description" data-en="See the stunning cosmic world that awaits you." data-ar="شاهد العالم الكوني المذهل الذي ينتظرك.">See the stunning cosmic world that awaits you.</p>
+            <div class="screenshots-scroll">
+                <div class="screenshot-frame">
+                    <div class="screenshot-placeholder">
+                        <span class="placeholder-icon">🚀</span>
+                        <span data-en="Gameplay" data-ar="أسلوب اللعب">Gameplay</span>
+                    </div>
+                </div>
+                <div class="screenshot-frame">
+                    <div class="screenshot-placeholder">
+                        <span class="placeholder-icon">🌠</span>
+                        <span data-en="Space Environment" data-ar="بيئة الفضاء">Space Environment</span>
+                    </div>
+                </div>
+                <div class="screenshot-frame">
+                    <div class="screenshot-placeholder">
+                        <span class="placeholder-icon">💫</span>
+                        <span data-en="Power-ups" data-ar="التعزيزات">Power-ups</span>
+                    </div>
+                </div>
+                <div class="screenshot-frame">
+                    <div class="screenshot-placeholder">
+                        <span class="placeholder-icon">🛸</span>
+                        <span data-en="Boss Battles" data-ar="معارك الزعماء">Boss Battles</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta-section">
+        <div class="cta-box fade-in">
+            <h2 class="cta-title" data-en="Ready to Conquer Space?" data-ar="مستعد لغزو الفضاء؟">Ready to Conquer Space?</h2>
+            <p class="cta-text" data-en="Download Sky Gravity: Comet Survival now and prove you have what it takes to survive the cosmos!" data-ar="حمّل Sky Gravity: Comet Survival الآن وأثبت أنك قادر على البقاء في الفضاء!">Download Sky Gravity: Comet Survival now and prove you have what it takes to survive the cosmos!</p>
+            <a href="https://play.google.com/store/apps/details?id=com.skygravity.orbitrunner" class="play-badge" target="_blank" rel="noopener">
+                <img id="playBadge2" src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" alt="Get it on Google Play">
+            </a>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-links">
+            <a href="privacy-policy.html" data-en="Privacy Policy" data-ar="سياسة الخصوصية">Privacy Policy</a>
+            <a href="mailto:skygravityorbit@gmail.com" data-en="Contact Us" data-ar="تواصل معنا">Contact Us</a>
+        </div>
+        <p class="footer-copyright">&copy; 2026 Sky Gravity Studio. All rights reserved.</p>
+    </footer>
+
+    <script>
+        function generateStars() {
+            const container = document.getElementById('starsContainer');
+            for (let i = 0; i < 180; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                const size = Math.random() * 2.5 + 0.5;
+                star.style.width = size + 'px';
+                star.style.height = size + 'px';
+                star.style.setProperty('--duration', (Math.random() * 4 + 2) + 's');
+                star.style.setProperty('--max-opacity', (Math.random() * 0.6 + 0.3));
+                star.style.animationDelay = Math.random() * 4 + 's';
+                container.appendChild(star);
+            }
+        }
+
+        let currentLang = 'en';
+        function setLang(lang) {
+            currentLang = lang;
+            const body = document.body;
+            const html = document.documentElement;
+
+            if (lang === 'ar') {
+                body.classList.add('rtl');
+                html.setAttribute('dir', 'rtl');
+                html.setAttribute('lang', 'ar');
+            } else {
+                body.classList.remove('rtl');
+                html.setAttribute('dir', 'ltr');
+                html.setAttribute('lang', 'en');
+            }
+
+            document.getElementById('btnEN').classList.toggle('active', lang === 'en');
+            document.getElementById('btnAR').classList.toggle('active', lang === 'ar');
+
+            document.querySelectorAll('[data-' + lang + ']').forEach(el => {
+                el.textContent = el.getAttribute('data-' + lang);
+            });
+
+            const badgeUrl = lang === 'ar'
+                ? 'https://play.google.com/intl/ar/badges/static/images/badges/ar_badge_web_generic.png'
+                : 'https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png';
+
+            const b1 = document.getElementById('playBadge');
+            const b2 = document.getElementById('playBadge2');
+            if (b1) b1.src = badgeUrl;
+            if (b2) b2.src = badgeUrl;
+        }
+
+        function initFadeIn() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) entry.target.classList.add('visible');
+                });
+            }, { threshold: 0.1 });
+            document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            generateStars();
+            initFadeIn();
+        });
+    </script>
+</body>
+</html>
