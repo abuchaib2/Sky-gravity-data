@@ -1,1 +1,19 @@
 
+{
+  "codes": [
+    {
+      "code": "SKYGRAVITY2026",
+      "rewardType": "BOTH",
+      "amountCoins": 1000,
+      "amountGems": 10,
+      "active": true
+    },
+    {
+      "code": "FREEGEMS",
+      "rewardType": "GEMS",
+      "amountCoins": 0,
+      "amountGems": 5,
+      "active": true
+    }
+  ]
+}
