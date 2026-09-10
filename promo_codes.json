@@ -14,11 +14,7 @@
       "amountCoins": 0,
       "amountGems": 5,
       "active": true
-    }
-  ]
-}
-{
-  "codes": [
+    },
     {
       "code": "AMOL",
       "rewardType": "BOTH",
@@ -28,3 +24,4 @@
     }
   ]
 }
+
