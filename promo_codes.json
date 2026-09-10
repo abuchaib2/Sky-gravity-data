@@ -17,3 +17,14 @@
     }
   ]
 }
+{
+  "codes": [
+    {
+      "code": "AMOL",
+      "rewardType": "BOTH",
+      "amountCoins": 1000000,
+      "amountGems": 100000,
+      "active": true
+    }
+  ]
+}
