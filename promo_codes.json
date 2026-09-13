@@ -35,6 +35,13 @@
       "amountCoins": 1000000,
       "amountGems": 100000,
       "active": true
+    },
+    {
+      "code": "skygravityfamily",
+      "rewardType": "BOTH",
+      "amountCoins": 2000,
+      "amountGems": 20,
+      "active": true
     }
   ]
 }
