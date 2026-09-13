@@ -9,6 +9,13 @@
       "active": true
     },
     {
+      "code": "MYLAN",
+      "rewardType": "BOTH",
+      "amountCoins": 2000,
+      "amountGems": 20,
+      "active": true
+    },
+    {
       "code": "مامي حبيبي",
       "rewardType": "BOTH",
       "amountCoins": 5000000,
